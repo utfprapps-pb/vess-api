@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.edu.utfpr.pb.pw45s</groupId>
-	<artifactId>projeto-final</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>projetofinal</name>
-	<description></description>
+	<artifactId>vess-api</artifactId>
+	<version>0.1</version>
+	<name>vess-api</name>
+	<description>vess-api</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -109,8 +109,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-
-
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>3.0.0</version>
+        </dependency>
 	</dependencies>
 
 	<build>
