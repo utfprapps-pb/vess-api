@@ -48,20 +48,22 @@ public class WebSecurity {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(authz -> authz
+
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(
-                                "/products/**",
-                                "/categories/**",
-                                "/avaliacao/**",
-                                "/camada/**",
-                                "/score/**",
-                                "/amostra/**",
-                                "/users/**",
-                                "/configuracao/**"
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/avaliacao").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/configuracao").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/configuracao/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/score/block").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/amostra").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/camada").permitAll()
+
+                        .anyRequest().authenticated()
                 )
+
                 .authenticationManager(authenticationManager)
                 .addFilter(jwtAuthenticationFilter)
                 .addFilterAfter(new JWTAuthorizationFilter(authenticationManager, userService), JWTAuthenticationFilter.class)
@@ -74,10 +76,11 @@ public class WebSecurity {
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://vess.app.pb.utfpr.edu.br/"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:8641/", "https://vess.app.pb.utfpr.edu.br/"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Origin"));
         configuration.setExposedHeaders(List.of("Authorization"));

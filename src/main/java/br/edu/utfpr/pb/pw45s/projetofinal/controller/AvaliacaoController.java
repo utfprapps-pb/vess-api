@@ -7,10 +7,13 @@ import br.edu.utfpr.pb.pw45s.projetofinal.repository.AvaliacaoRepository;
 import br.edu.utfpr.pb.pw45s.projetofinal.service.AmostraService;
 import br.edu.utfpr.pb.pw45s.projetofinal.service.AvaliacaoService;
 import br.edu.utfpr.pb.pw45s.projetofinal.shared.CrudController;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,12 +24,17 @@ public class AvaliacaoController extends CrudController<Long, Avaliacao, Avaliac
 
     private final AmostraService amostraService;
     private final AvaliacaoService avaliacaoService;
+    private final HttpServletRequest request;
 
-    public AvaliacaoController(AmostraService amostraService, AvaliacaoService avaliacaoService) {
+    @Value("${app.security.mobile-api-key}")
+    private String correctApiKey;
+
+    public AvaliacaoController(AmostraService amostraService, AvaliacaoService avaliacaoService, HttpServletRequest request) {
         super(Avaliacao.class, AvaliacaoDTO.class);
 
         this.amostraService = amostraService;
         this.avaliacaoService = avaliacaoService;
+        this.request = request;
     }
 
     @GetMapping("/{id}/completa")
@@ -42,6 +50,13 @@ public class AvaliacaoController extends CrudController<Long, Avaliacao, Avaliac
     @Override
     @PostMapping
     public ResponseEntity<Long> create(@RequestBody @Valid AvaliacaoDTO dto) {
+
+        String requestApiKey = this.request.getHeader("X-API-Key");
+        if (requestApiKey == null || !requestApiKey.equals(correctApiKey)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Chave de API inválida ou ausente.");
+        }
+
+        System.out.println("debug: " + dto);
         Avaliacao entity = toEntity(dto);
 
         if (entity.getAmostras() != null) {
@@ -57,7 +72,6 @@ public class AvaliacaoController extends CrudController<Long, Avaliacao, Avaliac
         }
 
         Avaliacao savedEntity = service.save(entity);
-
         return new ResponseEntity<>(savedEntity.getId(), HttpStatus.CREATED);
     }
 }
